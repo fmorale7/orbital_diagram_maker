@@ -30,7 +30,7 @@
     const ctx = canvas.getContext('2d');
 
     const shapes = [ // houses orbital clickable areas
-      { type: 'rectangle', x: 80-15, y: 200-15, width: 60, height: 30, color: 'rgba(10, 10, 10, 0.00)', state: 0 }
+      { type: 'rectangle', x: 80-15, y: 200-35, width: 60, height: 40, color: 'rgba(10, 10, 10, 0.05)', state: 0 }
     ];
 
     function cycleState(shape){
@@ -65,7 +65,7 @@
     }
 
     function addClickArea(clickX, clickY) {
-      let temp = {type: 'rectangle', x: clickX-15, y: clickY-15, width: 60, height: 30, color: 'rgba(10, 10, 10, 0.0)', state: 0};
+      let temp = {type: 'rectangle', x: clickX-35, y: clickY-15, width: 60, height: 40, color: 'rgba(10, 10, 10, 0.05)', state: 0};
       shapes.push(temp);
       // drawClickable();
       // drawLevel(clickX,clickY); 
@@ -103,9 +103,9 @@
           } else if (isClickInside(shape, x, y)){
             flip = false;
             arrow = true;
-
+//x-20
             if (shape.state == 0) {
-              drawArrow('up', shape.x + 15, shape.y + 15);
+              drawArrow('up', shape.x - 5, shape.y + 15);
               cycleState(shape)
             } else if (shape.state == 1) {
               arrowX = shape.x + 15;
