@@ -103,7 +103,14 @@
           } else if (isClickInside(shape, x, y)){
             flip = false;
             arrow = true;
-//x-20
+            /*
+            We clicked within existing level region, so I won't add a new one.
+            I want to interact with existing, clicked level.
+            Cycle:
+              if empty orbital, add up arrow
+              if already has up arrow, add down arrow
+              if already has up and down, remove both. Restore to clear.
+            */
             if (shape.state == 0) {
               drawArrow('up', shape.x - 5, shape.y + 15);
               cycleState(shape)
@@ -123,17 +130,9 @@
         addClickArea(x, y);
         drawLevel(x,y);
       }
-      if (arrow == true){
-        /*
-        We clicked within existing level region, so I won't add a new one.
-        I want to interact with existing, clicked level.
-        Cycle:
-          if empty orbital, add up arrow
-          if already has up arrow, add down arrow
-          if already has up and down, remove both. Restore to clear.
-        */
+/*       if (arrow == true){
         drawArrow('down', arrowX, arrowY);
-      };
+      }; */
     });
 
     function drawArrow (dir, fromX, fromY, toX = fromX, headLength = 10){
