@@ -28,10 +28,119 @@
   <script>
     const canvas = document.getElementById('myCanvas');
     const ctx = canvas.getContext('2d');
+////////////////////////////////////////////
+/*     const lineStart = { x: 100, y: 100 }; // Line start point
+    const lineEnd = { x: 400, y: 100 };  // Line end point
 
+    let lineVisible = false; // Flag to track visibility
+
+    // Function to draw the line if visible
+    function drawLine() {
+        ctx.clearRect(lineStart.x, lineStart.y - 1, 300, 2); // Clear canvas before drawing
+        if (lineVisible) {
+            ctx.beginPath();
+            ctx.moveTo(lineStart.x, lineStart.y);
+            ctx.lineTo(lineEnd.x, lineEnd.y);
+            ctx.stroke();
+        }
+    }
+
+    // Event listener for mouse movement over the canvas
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Check if mouse is hovering near the line
+        const distance = Math.abs((lineEnd.y - lineStart.y) * mouseX - (lineEnd.x - lineStart.x) * mouseY + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x) /
+            Math.sqrt(Math.pow(lineEnd.y - lineStart.y, 2) + Math.pow(lineEnd.x - lineStart.x, 2));
+
+        if (distance < 15) { // Adjust the 5 for tolerance around the line
+            lineVisible = true;
+        } else {
+            lineVisible = false;
+        }
+        drawLine();
+    });
+
+    // Initial drawing of the line (invisible by default)
+    drawLine(); */
+/////////////////////////////////////////////////////////////////
+// Line coordinates
+/*     const lineStart = { x: 100, y: 100 };
+        const lineEnd = { x: 400, y: 100 };
+        
+        let isHovering = false;
+
+        // Function to check if mouse is over the line
+        function isMouseOverLine(x, y) {
+            const tolerance = 10; // Allowable tolerance from the line
+            const dx = lineEnd.x - lineStart.x;
+            const dy = lineEnd.y - lineStart.y;
+            const lineLength = Math.sqrt(dx * dx + dy * dy);
+            const distance = Math.abs(dy * x - dx * y + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x) / lineLength;
+            return distance <= tolerance;
+        }
+
+        // Draw the line (only when hovering)
+        function drawLine() {
+            // Only draw the line if hovering
+            if (isHovering) {
+                ctx.beginPath();
+                ctx.moveTo(lineStart.x, lineStart.y);
+                ctx.lineTo(lineEnd.x, lineEnd.y);
+                ctx.strokeStyle = 'black'; // Set line color
+                ctx.lineWidth = 2; // Line thickness
+                ctx.stroke();
+            }
+        }
+
+        // Event listener for mouse movement
+        canvas.addEventListener('mousemove', (e) => {
+            const mouseX = e.offsetX;
+            const mouseY = e.offsetY;
+            isHovering = isMouseOverLine(mouseX, mouseY);
+            drawLine();
+        });
+
+        // Draw other objects on the canvas (example)
+        function drawOtherObjects() {
+            // Example: Draw a circle
+            ctx.beginPath();
+            ctx.arc(250, 250, 50, 0, Math.PI * 2);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+        }
+
+        // Initial drawing
+        drawOtherObjects();  // Draw other objects first (circle in this case)
+        drawLine();          // Draw the line (initially hidden) */
+/////////////////////////////////////////////////////////////////
     const shapes = [ // houses orbital clickable areas
       { type: 'rectangle', x: 80-15, y: 200-35, width: 60, height: 40, color: 'rgba(10, 10, 10, 0.05)', state: 0 }
     ];
+
+    /*
+    Want to implement orbital guided alignment. Use places initial orbital.
+    Hover above/below or left/right and axis guidelines appear, mouse snaps to guideline.
+    User can click within proximity to these lines and accurately place next orbital aligned
+    horizontally or vertically with previous. Communicatively accurate, aesthetically pleasing,
+    simple/intuitive use.
+
+    When drawLevel function called, also add new level coordinates to levelArray. Keeps track of objects,
+    allowing for future interaction. Like shapes for clickable area, rectangles will be associated with each orbital.
+    A long horizontal, and a long vertical. A hovering event within these areas will trigger transient action:
+    drawing line will hovering in area. Prompts user to click and orbital automatically adopts nearest coordinates aligned with line.
+    
+    Implementing via lineVisible instead of clearRect, since the latter may easily clip objects within line of fire.
+    Also use visibility for electron filling cycle. Clearing is too prone to collateral.
+    */
+
+/*     const boxAlign = [
+      {type: 'align_box_x', x: rect.left, width: rect.right - rect.left}
+    ] */
+
+    
 
     function cycleState(shape){
       if (shape.state == 0){
@@ -169,3 +278,7 @@
   </script>
 </body>
 </html>
+
+
+
+
