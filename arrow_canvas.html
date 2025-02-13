@@ -65,7 +65,7 @@
     }
 
     function addClickArea(clickX, clickY) {
-      let temp = {type: 'rectangle', x: clickX-35, y: clickY-15, width: 60, height: 40, color: 'rgba(10, 10, 10, 0.05)', state: 0};
+      let temp = {type: 'rectangle', x: clickX, y: clickY-40, width: 30, height: 40, color: 'rgba(10, 10, 10, 0.00)', state: 0};
       shapes.push(temp);
       // drawClickable();
       // drawLevel(clickX,clickY); 
@@ -94,8 +94,8 @@
       const y = event.clientY - rect.top;
       let flip = false;
       let arrow = false;
-      arrowX = 0;
-      arrowY = 0;
+/*       arrowX = 0;
+      arrowY = 0; */
 
       shapes.forEach(shape => {
           if (!isClickInside(shape, x, y)) {
@@ -112,15 +112,15 @@
               if already has up and down, remove both. Restore to clear.
             */
             if (shape.state == 0) {
-              drawArrow('up', shape.x - 5, shape.y + 15);
+              drawArrow('up', shape.x, shape.y + 40);
               cycleState(shape)
             } else if (shape.state == 1) {
-              arrowX = shape.x + 15;
-              arrowY = shape.y + 15;
-              drawArrow('down', arrowX, arrowY);
+/*               arrowX = shape.x + 15;
+              arrowY = shape.y + 15; */
+              drawArrow('down', shape.x, shape.y + 40);
               cycleState(shape)
             } else if (shape.state == 2) {
-              ctx.clearRect(shape.x + 15, shape.y - 20, 30, 30)
+              ctx.clearRect(shape.x, shape.y, 30, 38)
               cycleState(shape)
             }
           }
@@ -162,9 +162,9 @@
       ctx.closePath();
     }
 
-    drawLevel(80, 200);
+/*     drawLevel(80, 200);
     drawArrow('up', 80, 200);
-    drawArrow('down', 80, 200);
+    drawArrow('down', 80, 200); */
 
   </script>
 </body>
