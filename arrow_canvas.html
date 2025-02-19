@@ -18,183 +18,39 @@
 </style>
 </head>
 <body>
-<!--   <div style="display: flex; flex-direction: column;">
-    <button id="orbital">Place orbital</button>
-    <button id="electron">Fill electron</button>
-  </div> -->
-
   <canvas id="myCanvas" width="800" height="800"></canvas>
-
   <script>
     const canvas = document.getElementById('myCanvas');
     const ctx = canvas.getContext('2d');
-////////////////////////////////////////////
-/*     const lineStart = { x: 100, y: 100 }; // Line start point
-    const lineEnd = { x: 400, y: 100 };  // Line end point
 
-    let lineVisible = false; // Flag to track visibility
+    // Minimal constants. All objects defined by click coordinates.
+    let orbLen = 30;
+    let arOrbGap = 5;
+    let arLen = 30;
 
-    // Function to draw the line if visible
-    function drawLine() {
-        ctx.clearRect(lineStart.x, lineStart.y - 1, 300, 2); // Clear canvas before drawing
-        if (lineVisible) {
-            ctx.beginPath();
-            ctx.moveTo(lineStart.x, lineStart.y);
-            ctx.lineTo(lineEnd.x, lineEnd.y);
-            ctx.stroke();
-        }
-    }
+    const clickPt = [{}]; // new house click instances
+    // {x, y, state, visible}
 
-    // Event listener for mouse movement over the canvas
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        // Check if mouse is hovering near the line
-        const distance = Math.abs((lineEnd.y - lineStart.y) * mouseX - (lineEnd.x - lineStart.x) * mouseY + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x) /
-            Math.sqrt(Math.pow(lineEnd.y - lineStart.y, 2) + Math.pow(lineEnd.x - lineStart.x, 2));
-
-        if (distance < 15) { // Adjust the 5 for tolerance around the line
-            lineVisible = true;
-        } else {
-            lineVisible = false;
-        }
-        drawLine();
-    });
-
-    // Initial drawing of the line (invisible by default)
-    drawLine(); */
-/////////////////////////////////////////////////////////////////
-// Line coordinates
-/*     const lineStart = { x: 100, y: 100 };
-        const lineEnd = { x: 400, y: 100 };
-        
-        let isHovering = false;
-
-        // Function to check if mouse is over the line
-        function isMouseOverLine(x, y) {
-            const tolerance = 10; // Allowable tolerance from the line
-            const dx = lineEnd.x - lineStart.x;
-            const dy = lineEnd.y - lineStart.y;
-            const lineLength = Math.sqrt(dx * dx + dy * dy);
-            const distance = Math.abs(dy * x - dx * y + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x) / lineLength;
-            return distance <= tolerance;
-        }
-
-        // Draw the line (only when hovering)
-        function drawLine() {
-            // Only draw the line if hovering
-            if (isHovering) {
-                ctx.beginPath();
-                ctx.moveTo(lineStart.x, lineStart.y);
-                ctx.lineTo(lineEnd.x, lineEnd.y);
-                ctx.strokeStyle = 'black'; // Set line color
-                ctx.lineWidth = 2; // Line thickness
-                ctx.stroke();
-            }
-        }
-
-        // Event listener for mouse movement
-        canvas.addEventListener('mousemove', (e) => {
-            const mouseX = e.offsetX;
-            const mouseY = e.offsetY;
-            isHovering = isMouseOverLine(mouseX, mouseY);
-            drawLine();
-        });
-
-        // Draw other objects on the canvas (example)
-        function drawOtherObjects() {
-            // Example: Draw a circle
-            ctx.beginPath();
-            ctx.arc(250, 250, 50, 0, Math.PI * 2);
-            ctx.fillStyle = 'blue';
-            ctx.fill();
-        }
-
-        // Initial drawing
-        drawOtherObjects();  // Draw other objects first (circle in this case)
-        drawLine();          // Draw the line (initially hidden) */
-/////////////////////////////////////////////////////////////////
-    const shapes = [ // houses orbital clickable areas
-      { type: 'rectangle', x: 80-15, y: 200-35, width: 60, height: 40, color: 'rgba(10, 10, 10, 0.05)', state: 0 }
-    ];
-
-    /*
-    Want to implement orbital guided alignment. Use places initial orbital.
-    Hover above/below or left/right and axis guidelines appear, mouse snaps to guideline.
-    User can click within proximity to these lines and accurately place next orbital aligned
-    horizontally or vertically with previous. Communicatively accurate, aesthetically pleasing,
-    simple/intuitive use.
-
-    When drawLevel function called, also add new level coordinates to levelArray. Keeps track of objects,
-    allowing for future interaction. Like shapes for clickable area, rectangles will be associated with each orbital.
-    A long horizontal, and a long vertical. A hovering event within these areas will trigger transient action:
-    drawing line will hovering in area. Prompts user to click and orbital automatically adopts nearest coordinates aligned with line.
+    const shapes = [{}]; // houses orbital clickable areas
     
-    Implementing via lineVisible instead of clearRect, since the latter may easily clip objects within line of fire.
-    Also use visibility for electron filling cycle. Clearing is too prone to collateral.
-    */
-
-/*     const boxAlign = [
-      {type: 'align_box_x', x: rect.left, width: rect.right - rect.left}
-    ] */
-
-    
-
-    function cycleState(shape){
-      if (shape.state == 0){
-        shape.state = 1
-      } else if (shape.state == 1){
-        shape.state = 2
-      } else if (shape.state == 2){
-        shape.state = 0
-      } 
-      console.log(shape.state)
+    // true if click is within existing box, false if out
+    // To cycle orb state.
+    function isClickInside(shape, x, y) {
+      return x >= shape.x && x <= shape.x + orbLen && y >= shape.y - arOrbGap - arLen && y <= shape.y + arOrbGap + arLen;
     }
 
-    let lastClickedButton = null;
-
-    const buttons = document.querySelectorAll('button');
-
-    buttons.forEach(button => {
-      button.addEventListener('click', () => {
-        lastClickedButton = button;
-        console.log(`Last clicked button: ${lastClickedButton.id}`);
-      });
-    });
-
-    function drawClickable() {
-      let shape = shapes[shapes.length - 1]
-      ctx.beginPath();
-      ctx.rect(shape.x, shape.y, shape.width, shape.height);
-      ctx.fillStyle = shape.color;
-      ctx.fill();
-      ctx.closePath();
+    // To prevent shape overlap.
+    function placeOrb(shape,x,y) {
+      return x <= shape.x - orbLen && x >= shape.x + orbLen && y <= shape.y - arOrbGap - arLen && y >= shape.y + arOrbGap + arLen;
     }
 
-    function addClickArea(clickX, clickY) {
-      let temp = {type: 'rectangle', x: clickX, y: clickY-40, width: 30, height: 40, color: 'rgba(10, 10, 10, 0.00)', state: 0};
-      shapes.push(temp);
-      // drawClickable();
-      // drawLevel(clickX,clickY); 
-    }
-
+    // draw new orbital
     function drawLevel(clickX, clickY) {
         ctx.beginPath();
         ctx.moveTo(clickX, clickY);
-        ctx.lineTo(clickX + 30, clickY);
+        ctx.lineTo(clickX + orbLen, clickY);
         ctx.stroke();
         drawClickable();
-    }
-
-    let canvasElem = document.querySelector("canvas");
-
-    function isClickInside(shape, x, y) {
-      if (shape.type === 'rectangle') {
-        return x >= shape.x && x <= shape.x + shape.width && y >= shape.y && y <= shape.y + shape.height;
-      }
-      return false;
     }
 
     canvas.addEventListener('click', (event) => {
@@ -203,8 +59,6 @@
       const y = event.clientY - rect.top;
       let flip = false;
       let arrow = false;
-/*       arrowX = 0;
-      arrowY = 0; */
 
       shapes.forEach(shape => {
           if (!isClickInside(shape, x, y)) {
@@ -221,12 +75,10 @@
               if already has up and down, remove both. Restore to clear.
             */
             if (shape.state == 0) {
-              drawArrow('up', shape.x, shape.y + 40);
+              drawArrow('up', shape.x, shape.y);
               cycleState(shape)
             } else if (shape.state == 1) {
-/*               arrowX = shape.x + 15;
-              arrowY = shape.y + 15; */
-              drawArrow('down', shape.x, shape.y + 40);
+              drawArrow('down', shape.x, shape.y);
               cycleState(shape)
             } else if (shape.state == 2) {
               ctx.clearRect(shape.x, shape.y, 30, 38)
@@ -234,46 +86,75 @@
             }
           }
       });
+//////////////////////
+      // Redefine arrow drawing coords wrt clicked coords.
+      // Include state parameter, toggles transparency
+      function drawArrow (dir, fromX, fromY, toX = fromX, headLength = 10, state = 0){
+        let toY = fromY;
+        
+        if (dir == 'up') {
+          fromX = fromX + orbLen/3
+          toX = toX + orbLen/3
+          fromY = fromY - arOrbGap
+          toY = toY - arOrbGap - arLen
+        } else if (dir == 'down') {
+          fromX = fromX + orbLen*2/3
+          toX = fromX
+          fromY = fromY - arOrbGap - arLen
+          toY = toY - arOrbGap
+          
+        }
 
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6)); // left head
+        ctx.stroke();
+        ctx.closePath();
+      }
+////////////////////////
       if (flip == true && arrow == false) {
         addClickArea(x, y);
         drawLevel(x,y);
       }
-/*       if (arrow == true){
-        drawArrow('down', arrowX, arrowY);
-      }; */
     });
 
-    function drawArrow (dir, fromX, fromY, toX = fromX, headLength = 10){
-      let toY = fromY;
-      
-      if (dir == 'up') {
-        fromX = fromX + 10
-        toX = toX + 10
-        fromY = fromY - 5
-        toY = fromY - 30
-      } else if (dir == 'down') {
-        fromX = fromX + 20
-        toX = toX + 20
-        fromY = fromY - 35
-        toY = fromY + 30
-      }
+    function cycleState(shape){
+      if (shape.state == 0){
+        shape.state = 1
+      } else if (shape.state == 1){
+        shape.state = 2
+      } else if (shape.state == 2){
+        shape.state = 0
+      } 
+      console.log(shape.state)
+    }
 
-      const angle = Math.atan2(toY - fromY, toX - fromX);
+    let lastClickedButton = null;
+    const buttons = document.querySelectorAll('button');
 
+    function drawClickable() {
+      let shape = shapes[shapes.length - 1]
       ctx.beginPath();
-      ctx.moveTo(fromX, fromY);
-      ctx.lineTo(toX, toY);
-
-      ctx.moveTo(toX, toY);
-      ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6)); // left head
-      ctx.stroke();
+      ctx.rect(shape.x, shape.y, shape.width, shape.height);
+      ctx.fillStyle = shape.color;
+      ctx.fill();
       ctx.closePath();
     }
 
-/*     drawLevel(80, 200);
-    drawArrow('up', 80, 200);
-    drawArrow('down', 80, 200); */
+    function addClickArea(clickX, clickY) {
+      let temp = {x: clickX, y: clickY, width: orbLen, height: arLen + arOrbGap, color: 'rgba(10, 10, 10, 0.00)', state: 0};
+      shapes.push(temp);
+      clickPt.push({x: clickX, y: clickY, state: 0});
+    }
+
+    let canvasElem = document.querySelector("canvas");
+
+
 
   </script>
 </body>
